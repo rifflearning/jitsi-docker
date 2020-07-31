@@ -1,0 +1,32 @@
+---
+version: '3.7'
+services:
+  pfm-riffdata:
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.labels.mongo == true]
+    configs:
+      - source: riffdata.local-production.yml.1
+        target: /app/config/local-production.yml
+
+  pfm-riffdata-db:
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.labels.mongo == true]
+
+configs:
+  riffdata.local-production.yml.1:
+    external: true
+
