@@ -38,6 +38,12 @@ remove-stack : ## remove the pfm-stk stack
 build-dev : $(SSL_FILES) ## (re)build the dev images pulling the latest base images
 	docker-compose $(COMPOSE_CONF_DEV) build --pull $(OPTS) $(SERVICE_NAME)
 
+# Add all constraint labels to the single docker node running in swarm mode on a development machine
+dev-swarm-labels : ## add all constraint labels to single swarm node
+	docker node update --label-add web=true \
+                       --label-add mongo=true \
+                       $(shell docker node ls --format="{{.ID}}")
+
 # Help documentation à la https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 # if you want the help sorted rather than in the order of occurrence, pipe the grep to sort and pipe that to awk
 help : ## this help documentation (extracted from comments on the targets)
