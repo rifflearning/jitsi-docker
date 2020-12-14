@@ -29,7 +29,7 @@ stop : ## run docker-compose stop
 logs : ## run docker-compose logs
 	docker-compose logs $(OPTS) $(SERVICE_NAME)
 
-deploy-stack : ## deploy the pfm-stk stack defined by compose/stack config and env var tags
+deploy-stack : ## deploy the pfm-stk stack defined by compose/stack config (just riffdata)
 	docker stack deploy $(STACK_CONF_DEPLOY) --with-registry-auth pfm-stk
 
 remove-stack : ## remove the pfm-stk stack
