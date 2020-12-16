@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Riffdata server Test</title>
+
+    <script src="https://unpkg.com/@feathersjs/client@^4.5.11/dist/feathers.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-selection@2"></script>
+
+   <style>
+        table.log
+        {
+            border:          1px solid black;
+            border-collapse: collapse;
+        }
+
+        th
+        {
+            border:          2px solid blue;
+        }
+
+        td
+        {
+            border:          1px solid gray;
+        }
+
+        td.result
+        {
+            white-space: pre;
+        }
+    </style>
+
+    <script type="text/javascript">
+        logger = {
+            log: console.log,
+            debug: console.debug,
+            info: console.info,
+            warn: console.warn,
+            error: console.error,
+            call: logCall,
+            result: logResult,
+        };
+
+        socket = null;
+        feathers_app = null;
+
+        // TODO: Figure out a better way to pass in the dataServer config rather than
+        // defining a dev and prod config here inline and hard coding which is used in
+        // the initFeathers function. -mjl 2020-06-03
+        dataServerDevelopment = {
+            url: 'http://localhost:3000',
+            path: '',
+        };
+        dataServerProduction = {
+            url: '/',
+            path: '/api/videodata',
+        };
+
+        function initFeathers() {
+            const dataServerConfig = dataServerProduction;
+
+            // Set up socket.io
+            const socket = io(dataServerConfig.url, {
+                timeout: 20000,
+                path: `${dataServerConfig.path}/socket.io`,
+                transports: [
+                    'websocket',
+                    'flashsocket',
+                    'htmlfile',
+                    'xhr-polling',
+                    'jsonp-polling',
+                ],
+                forceNew: true,
+            });
+
+            // Initialize a Feathers app
+            const feathers_app = feathers();
+
+            // Register socket.io to talk to our server
+            // Note: feathers stores the socket in feathers_app.io so it can be retrieved if needed
+            //       and does not need to be returned and saved.
+            feathers_app.configure(feathers.socketio(socket, { timeout: 10000 }));
+
+            feathers_app.configure(feathers.authentication({
+                storage: window.localStorage
+            }));
+
+            return feathers_app;
+        }
+
+        async function feathersLogin(feathers_app) {
+            try {
+                // First try to log in with an existing JWT
+                const auth = await feathers_app.reAuthenticate();
+                logger.warn('reAuthenticate succeeded:', auth);
+                return auth;
+            }
+            catch (err) {
+                logger.warn('reAuthenticate failed:', err);
+
+                // If that errors, log in with email/password
+                // Here we would normally show a login page
+                // to get the login information
+                try {
+                    const auth = await feathers_app.authenticate({
+                        strategy: 'local',
+                        email: 'default-user-email',
+                        password: 'default-user-password'
+                    });
+
+                    logger.log('email/pswd login succeeded:', auth);
+                    return auth;
+                }
+                catch (err) {
+                    logger.warn('email/pswd login failed:', err);
+                    throw err;
+                }
+            }
+        }
+
+        function feathersSocketIsConnected(feathers_app) {
+            return feathers_app.io.connected;
+        }
+
+        function logCall(...args) {
+            logger.info(...args);
+            const tbody = d3.select('table.log>tbody');
+            tbody.append('tr').append('td')
+                .text(args[0]);
+        }
+
+        function logResult(...args) {
+            logger.info(...args);
+            const lastRow = d3.select('table.log>tbody tr:last-child');
+            lastRow.append('td')
+                .attr('class', 'result')
+                .text(JSON.stringify(args[0], null, 2));
+        }
+
+        async function test() {
+            logger.call('initFeathers()');
+            const feathers_app = initFeathers();
+
+            logger.call('feathersLogin()');
+            const auth = await feathersLogin(feathers_app);
+            logger.result(auth);
+
+            logger.call('usersSrv.find()');
+            const users = await feathers_app.service('users').find();
+            logger.result(users);
+        }
+
+    </script>
+</head>
+<body>
+    <h1>Test page for connecting to the Riffdata Server</h1>
+
+    <p> Check the console log messages </p>
+    <table class="log">
+        <thead>
+            <tr><th>Call</th><th>Result</th></tr>
+        <tbody>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        test();
+    </script>
+</body>
+</html>
