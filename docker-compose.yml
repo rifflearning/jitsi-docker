@@ -2,7 +2,7 @@
 version: '3.7'
 services:
   pfm-riffdata:
-    image: 'docker.pkg.github.com/rifflearning/riff-server/riffdata:2.0.0-dev.9'
+    image: 'docker.pkg.github.com/rifflearning/riff-server/riffdata:2.0.0-dev.10'
     hostname: pfm-riffdata
     depends_on:
       - pfm-riffdata-db
@@ -11,6 +11,8 @@ services:
 
   pfm-riffdata-db:
     image: mongo:latest
+    ports:
+      - '27017:27017'
     volumes:
       - pfm-riffdata-db-data:/data/db
       - pfm-riffdata-db-configdb:/data/configdb
