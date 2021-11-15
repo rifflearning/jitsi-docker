@@ -35,8 +35,18 @@ deploy-stack : ## deploy the pfm-stk stack defined by compose/stack config (just
 remove-stack : ## remove the pfm-stk stack
 	docker stack remove pfm-stk
 
-build-dev : $(SSL_FILES) ## (re)build the dev images pulling the latest base images
+build-dev : ## (re)build the dev images pulling the latest base images
 	docker-compose $(COMPOSE_CONF_DEV) build --pull $(OPTS) $(SERVICE_NAME)
+
+dev-server : SERVICE_NAME = pfm-riffdata ## start a dev container for the riff-server
+dev-server : _start-dev
+
+.PHONY : _start-dev
+_start-dev :
+	$(call ndef,SERVICE_NAME)
+	-docker-compose $(COMPOSE_CONF_DEV) run --service-ports $(OPTS) $(SERVICE_NAME) bash
+	-docker-compose rm --force -v
+	-docker-compose stop
 
 # Add all constraint labels to the single docker node running in swarm mode on a development machine
 dev-swarm-labels : ## add all constraint labels to single swarm node
