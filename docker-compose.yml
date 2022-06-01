@@ -2,7 +2,7 @@
 version: '3.7'
 services:
   pfm-riffdata:
-    image: 'docker.pkg.github.com/rifflearning/riff-server/riffdata:3.0.0'
+    image: 'ghcr.io/rifflearning/riff-server/riffdata:3.0.0'
     hostname: pfm-riffdata
     depends_on:
       - pfm-riffdata-db
