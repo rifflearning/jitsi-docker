@@ -1,7 +1,7 @@
 ---
 version: '3.7'
 services:
-  pfm-riffdata:
+  pfm-riffcollector:
     deploy:
       replicas: 1
       update_config:
@@ -12,10 +12,10 @@ services:
       placement:
         constraints: [node.labels.mongo == true]
     configs:
-      - source: riffdata.local-production.yml.1
+      - source: riffcollector.local-production.yml.1
         target: /app/config/local-production.yml
 
-  pfm-riffdata-db:
+  pfm-riffcollector-db:
     deploy:
       replicas: 1
       update_config:
@@ -27,6 +27,6 @@ services:
         constraints: [node.labels.mongo == true]
 
 configs:
-  riffdata.local-production.yml.1:
+  riffcollector.local-production.yml.1:
     external: true
 

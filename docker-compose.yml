@@ -1,21 +1,21 @@
 ---
 version: '3.7'
 services:
-  pfm-riffdata:
-    image: 'ghcr.io/rifflearning/riff-server/riffdata:3.0.0'
-    hostname: pfm-riffdata
+  pfm-riffcollector:
+    image: 'ghcr.io/rifflearning/riffcollector:1.0.0'
+    hostname: pfm-riffcollector
     depends_on:
-      - pfm-riffdata-db
+      - pfm-riffcollector-db
     ports:
       - '3000:3000'
 
-  pfm-riffdata-db:
+  pfm-riffcollector-db:
     image: mongo:latest
     ports:
       - '27017:27017'
     volumes:
-      - pfm-riffdata-db-data:/data/db
-      - pfm-riffdata-db-configdb:/data/configdb
+      - pfm-riffcollector-db-data:/data/db
+      - pfm-riffcollector-db-configdb:/data/configdb
 
   pfm-redis:
     image: redis:latest
@@ -25,7 +25,7 @@ services:
       - pfm-redis-data:/data
 
 volumes:
-  pfm-riffdata-db-data:
-  pfm-riffdata-db-configdb:
+  pfm-riffcollector-db-data:
+  pfm-riffcollector-db-configdb:
   pfm-redis-data:
 
